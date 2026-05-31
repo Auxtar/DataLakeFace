@@ -19,7 +19,7 @@ const STATE_COLORS: Record<AuthState, string> = {
 
 const LANGUAGES = Object.keys(LANGUAGE_LABELS) as Language[];
 
-export default function FaceAuthScreen() {
+export default function FaceAuthScreen(props: {onBack?: () => void}) {
   const device = useCameraDevice('front');
   const {hasPermission, requestPermission} = useCameraPermission();
   const [authState, setAuthState] = useState<AuthState>('idle');
@@ -27,6 +27,7 @@ export default function FaceAuthScreen() {
   const [timer, setTimer] = useState(0);
   const [speedMs, setSpeedMs] = useState(0);
   const [lang, setLang] = useState<Language>('hi');
+  const onBack = props.onBack;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const t = translations[lang];
 
@@ -76,7 +77,9 @@ export default function FaceAuthScreen() {
       setSpeedMs(elapsed);
       const mockPassed = Math.random() > 0.3;
       if (mockPassed) {
+        initDB();
         saveAttendance('EMP_001', [0.1, 0.2, 0.3], true);
+        console.log('[AUTH] verified, saving record');
         setAuthState('success');
         setInstruction(`${t.verified} · ${elapsed}ms`);
         Vibration.vibrate(200);
@@ -113,6 +116,7 @@ export default function FaceAuthScreen() {
       <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
       <View style={styles.overlay}>
         <View style={styles.topRow}>
+        {onBack && <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← Back</Text></TouchableOpacity>}
           <Text style={styles.header}>{t.fieldAuth}</Text>
           <TouchableOpacity style={styles.langBtn} onPress={cycleLanguage}>
             <Text style={styles.langText}>{LANGUAGE_LABELS[lang]}</Text>
@@ -174,5 +178,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6, borderRadius: 20, marginBottom: 30, borderWidth: 1,
   },
   speedBadge: {color: '#00ff88', fontSize: 13, textAlign: 'center', marginBottom: 8, fontWeight: '700'},
+  backText: {color: '#00ff88', fontSize: 13},
   statusText: {fontSize: 11, letterSpacing: 1.5},
 });

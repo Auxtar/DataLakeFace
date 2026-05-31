@@ -1,9 +1,17 @@
 import { open } from '@op-engineering/op-sqlite';
 
-const db = open({ name: 'attendance.db' });
+let db: any = null;
+
+function getDB() {
+  if (!db) {
+    db = open({ name: 'attendance.db' });
+  }
+  return db;
+}
 
 export function initDB() {
-  db.execute(`
+  const d = getDB();
+  d.execute(`
     CREATE TABLE IF NOT EXISTS enrollments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       employee_id TEXT UNIQUE NOT NULL,
@@ -11,7 +19,7 @@ export function initDB() {
       face_vector TEXT NOT NULL
     )
   `);
-  db.execute(`
+  d.execute(`
     CREATE TABLE IF NOT EXISTS attendance (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       employee_id TEXT NOT NULL,
@@ -24,19 +32,20 @@ export function initDB() {
 }
 
 export function saveEnrollment(employeeId: string, name: string, faceVector: number[]) {
-  db.execute(
+  getDB().executeSync(
     `INSERT OR REPLACE INTO enrollments (employee_id, name, face_vector) VALUES (?, ?, ?)`,
     [employeeId, name, JSON.stringify(faceVector)]
   );
 }
 
 export function getEnrollments() {
-  const result = db.execute(`SELECT * FROM enrollments`);
-  return result.rows?._array ?? [];
+  const result = getDB().executeSync(`SELECT * FROM enrollments`);
+  console.log('[DB] getUnsynced result:', JSON.stringify(result));
+  return result.rows?._array ?? result.rows ?? [];
 }
 
 export function saveAttendance(employeeId: string, faceVector: number[], livenessPassed: boolean) {
-  db.execute(
+  getDB().executeSync(
     `INSERT INTO attendance (employee_id, timestamp, face_vector, liveness_passed, synced)
      VALUES (?, ?, ?, ?, 0)`,
     [employeeId, new Date().toISOString(), JSON.stringify(faceVector), livenessPassed ? 1 : 0]
@@ -44,14 +53,15 @@ export function saveAttendance(employeeId: string, faceVector: number[], livenes
 }
 
 export function getUnsynced() {
-  const result = db.execute(`SELECT * FROM attendance WHERE synced = 0`);
-  return result.rows?._array ?? [];
+  const result = getDB().executeSync(`SELECT * FROM attendance WHERE synced = 0`);
+  console.log('[DB] getUnsynced result:', JSON.stringify(result));
+  return result.rows?._array ?? result.rows ?? [];
 }
 
 export function markSynced(id: number) {
-  db.execute(`UPDATE attendance SET synced = 1 WHERE id = ?`, [id]);
+  getDB().executeSync(`UPDATE attendance SET synced = 1 WHERE id = ?`, [id]);
 }
 
 export function purgeSynced() {
-  db.execute(`DELETE FROM attendance WHERE synced = 1`);
+  getDB().executeSync(`DELETE FROM attendance WHERE synced = 1`);
 }

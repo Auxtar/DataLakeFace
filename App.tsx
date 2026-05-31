@@ -1,15 +1,19 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import FaceAuthScreen from './src/screens/FaceAuthScreen';
+import {initDB} from './src/store/attendanceStore';
 import EnrollScreen from './src/screens/EnrollScreen';
+import AdminScreen from './src/screens/AdminScreen';
 
-type Screen = 'home' | 'auth' | 'enroll';
+type Screen = 'home' | 'auth' | 'enroll' | 'admin';
 
 export default function App() {
+  React.useEffect(() => { initDB(); }, []);
   const [screen, setScreen] = useState<Screen>('home');
 
   if (screen === 'auth') return <FaceAuthScreen onBack={() => setScreen('home')} />;
   if (screen === 'enroll') return <EnrollScreen onBack={() => setScreen('home')} />;
+  if (screen === 'admin') return <AdminScreen onBack={() => setScreen('home')} />;
 
   return (
     <View style={styles.container}>
@@ -20,6 +24,9 @@ export default function App() {
       </TouchableOpacity>
       <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => setScreen('enroll')}>
         <Text style={[styles.btnText, {color: '#00ff88'}]}>👤  Enroll New Employee</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => setScreen('admin')}>
+        <Text style={[styles.btnText, {color: '#aaa'}]}>⚙️  Sync Dashboard</Text>
       </TouchableOpacity>
     </View>
   );
@@ -36,6 +43,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#00ff88', paddingVertical: 16, borderRadius: 12,
     alignItems: 'center', width: '100%', marginBottom: 16,
   },
-  btnSecondary: {backgroundColor: '#111', borderWidth: 1, borderColor: '#00ff88'},
+  btnSecondary: {backgroundColor: '#111', borderWidth: 1, borderColor: '#333'},
   btnText: {color: '#000', fontWeight: '700', fontSize: 16},
 });
