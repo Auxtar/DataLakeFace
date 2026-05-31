@@ -4,6 +4,14 @@ const db = open({ name: 'attendance.db' });
 
 export function initDB() {
   db.execute(`
+    CREATE TABLE IF NOT EXISTS enrollments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      employee_id TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      face_vector TEXT NOT NULL
+    )
+  `);
+  db.execute(`
     CREATE TABLE IF NOT EXISTS attendance (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       employee_id TEXT NOT NULL,
@@ -13,6 +21,18 @@ export function initDB() {
       synced INTEGER DEFAULT 0
     )
   `);
+}
+
+export function saveEnrollment(employeeId: string, name: string, faceVector: number[]) {
+  db.execute(
+    `INSERT OR REPLACE INTO enrollments (employee_id, name, face_vector) VALUES (?, ?, ?)`,
+    [employeeId, name, JSON.stringify(faceVector)]
+  );
+}
+
+export function getEnrollments() {
+  const result = db.execute(`SELECT * FROM enrollments`);
+  return result.rows?._array ?? [];
 }
 
 export function saveAttendance(employeeId: string, faceVector: number[], livenessPassed: boolean) {
