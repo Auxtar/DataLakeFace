@@ -2,13 +2,14 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import FaceAuthScreen from './src/screens/FaceAuthScreen';
 import {initDB} from './src/store/attendanceStore';
+import {loadModels} from './src/services/inferenceService';
 import EnrollScreen from './src/screens/EnrollScreen';
 import AdminScreen from './src/screens/AdminScreen';
 
 type Screen = 'home' | 'auth' | 'enroll' | 'admin';
 
 export default function App() {
-  React.useEffect(() => { initDB(); }, []);
+  React.useEffect(() => { initDB(); loadModels(); }, []);
   const [screen, setScreen] = useState<Screen>('home');
 
   if (screen === 'auth') return <FaceAuthScreen onBack={() => setScreen('home')} />;
