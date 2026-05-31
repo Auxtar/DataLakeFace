@@ -41,7 +41,7 @@ export function saveEnrollment(employeeId: string, name: string, faceVector: num
 export function getEnrollments() {
   const result = getDB().executeSync(`SELECT * FROM enrollments`);
   console.log('[DB] getUnsynced result:', JSON.stringify(result));
-  return result.rows?._array ?? result.rows ?? [];
+  return Array.isArray(result.rows) ? result.rows : [];
 }
 
 export function saveAttendance(employeeId: string, faceVector: number[], livenessPassed: boolean) {
@@ -55,7 +55,7 @@ export function saveAttendance(employeeId: string, faceVector: number[], livenes
 export function getUnsynced() {
   const result = getDB().executeSync(`SELECT * FROM attendance WHERE synced = 0`);
   console.log('[DB] getUnsynced result:', JSON.stringify(result));
-  return result.rows?._array ?? result.rows ?? [];
+  return Array.isArray(result.rows) ? result.rows : [];
 }
 
 export function markSynced(id: number) {
