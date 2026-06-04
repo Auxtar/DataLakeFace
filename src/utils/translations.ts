@@ -6,6 +6,7 @@ interface Strings {
   blink: string;
   smile: string;
   turnLeft: string;
+  turnRight: string;
   verifying: string;
   verified: string;
   failed: string;
@@ -21,6 +22,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'Blink your eyes slowly',
     smile: 'Give a natural smile',
     turnLeft: 'Slowly turn your head left',
+    turnRight: 'Slowly turn your head right',
     verifying: 'Verifying identity...',
     verified: 'Identity verified',
     failed: 'Verification failed. Try again.',
@@ -34,6 +36,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'धीरे-धीरे पलकें झपकाएं',
     smile: 'स्वाभाविक मुस्कान दें',
     turnLeft: 'धीरे-धीरे सिर बाईं ओर घुमाएं',
+    turnRight: 'धीरे-धीरे सिर दाईं ओर घुमाएं',
     verifying: 'पहचान सत्यापित हो रही है...',
     verified: 'पहचान सत्यापित हुई',
     failed: 'सत्यापन विफल। पुनः प्रयास करें।',
@@ -47,6 +50,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'மெதுவாக கண்களை மூடி திறக்கவும்',
     smile: 'இயற்கையான புன்னகை கொடுங்கள்',
     turnLeft: 'தலையை மெதுவாக இடதுபுறம் திருப்பவும்',
+    turnRight: 'தலையை மெதுவாக வலதுபுறம் திருப்பவும்',
     verifying: 'அடையாளம் சரிபார்க்கப்படுகிறது...',
     verified: 'அடையாளம் உறுதிப்படுத்தப்பட்டது',
     failed: 'சரிபார்ப்பு தோல்வி. மீண்டும் முயற்சிக்கவும்.',
@@ -60,6 +64,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'మెల్లగా కళ్ళు మూసి తెరవండి',
     smile: 'సహజంగా నవ్వండి',
     turnLeft: 'తల మెల్లగా ఎడమవైపు తిప్పండి',
+    turnRight: 'తల మెల్లగా కుడివైపు తిప్పండి',
     verifying: 'గుర్తింపు ధృవీకరించబడుతోంది...',
     verified: 'గుర్తింపు ధృవీకరించబడింది',
     failed: 'ధృవీకరణ విఫలమైంది. మళ్ళీ ప్రయత్నించండి.',
@@ -73,6 +78,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'ধীরে ধীরে চোখ পিটপিট করুন',
     smile: 'স্বাভাবিক হাসি দিন',
     turnLeft: 'আস্তে আস্তে মাথা বাঁদিকে ঘোরান',
+    turnRight: 'আস্তে আস্তে মাথা ডানদিকে ঘোরান',
     verifying: 'পরিচয় যাচাই হচ্ছে...',
     verified: 'পরিচয় যাচাই হয়েছে',
     failed: 'যাচাই ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
@@ -86,6 +92,7 @@ export const translations: Record<Language, Strings> = {
     blink: 'हळूहळू डोळे मिचकावा',
     smile: 'नैसर्गिक हास्य द्या',
     turnLeft: 'हळूहळू डोके डावीकडे वळवा',
+    turnRight: 'हळूहळू डोके उजवीकडे वळवा',
     verifying: 'ओळख सत्यापित होत आहे...',
     verified: 'ओळख सत्यापित झाली',
     failed: 'सत्यापन अयशस्वी. पुन्हा प्रयत्न करा.',

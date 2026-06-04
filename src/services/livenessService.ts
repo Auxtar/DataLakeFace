@@ -1,14 +1,13 @@
-type LivenessChallenge = 'blink' | 'smile' | 'turn_left';
+type LivenessChallenge = 'turn_left' | 'turn_right';
 
 export function getRandomChallenge(): LivenessChallenge {
-  const challenges: LivenessChallenge[] = ['blink', 'smile', 'turn_left'];
+  const challenges: LivenessChallenge[] = ['turn_left', 'turn_right'];
   return challenges[Math.floor(Math.random() * challenges.length)];
 }
 
 export function getChallengeInstruction(challenge: LivenessChallenge, t: any): string {
   switch (challenge) {
-    case 'blink': return t.blink;
-    case 'smile': return t.smile;
     case 'turn_left': return t.turnLeft;
+    case 'turn_right': return t.turnRight;
   }
 }

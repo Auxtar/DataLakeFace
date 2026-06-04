@@ -70,6 +70,23 @@ async function decodeResizedJpeg(uri: string): Promise<{rgb: Uint8Array; w: numb
   }
 }
 
+export async function snapshotToBbox(filePath: string): Promise<number | null> {
+  try {
+    const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
+    const resized = await ImageResizer.createResizedImage(uri, 128, 128, 'JPEG', 80, 0, undefined, undefined, {mode: 'cover'});
+    const decoded = await decodeResizedJpeg(resized.uri);
+    if (!decoded) return null;
+    const {rgb: square, side} = letterboxSquare(decoded.rgb, decoded.w, decoded.h);
+    const detectInput = cropRGB(square, side, side, 0, 0, 1, 1, 128);
+    const bbox = detectFace(detectInput);
+    if (!bbox) return null;
+    return (bbox[0] + bbox[2]) / 2;
+  } catch (e) {
+    console.error('[imageUtils] snapshotToBbox failed:', e);
+    return null;
+  }
+}
+
 export async function snapshotToPixels(
   filePath: string,
 ): Promise<{px112: Uint8Array; px224: Uint8Array} | null> {

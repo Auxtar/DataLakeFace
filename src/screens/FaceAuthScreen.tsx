@@ -6,7 +6,7 @@ import {initDB, saveAttendance, getEnrollments} from '../store/attendanceStore';
 import {startSyncWatcher} from '../services/syncService';
 import {translations, LANGUAGE_LABELS, Language} from '../utils/translations';
 import {loadModels, getFaceEmbedding, isLive, findBestMatch, RECOGNITION_THRESHOLD} from '../services/inferenceService';
-import {snapshotToPixels} from '../utils/imageUtils';
+import {snapshotToPixels, snapshotToBbox} from '../utils/imageUtils';
 
 type AuthState = 'idle' | 'detecting' | 'liveness' | 'recognising' | 'success' | 'failed';
 
@@ -34,6 +34,9 @@ export default function FaceAuthScreen(props: {onBack?: () => void}) {
   const [modelsReady, setModelsReady] = useState(false);
   const onBack = props.onBack;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sampleIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const centerXReadings = useRef<number[]>([]);
+  const samplingActive = useRef(false);
   const cameraRef = useRef<Camera>(null);
   const t = translations[lang];
 
@@ -52,6 +55,10 @@ export default function FaceAuthScreen(props: {onBack?: () => void}) {
     if (timerRef.current) clearInterval(timerRef.current);
   };
 
+  const clearSampleInterval = () => {
+    if (sampleIntervalRef.current) clearInterval(sampleIntervalRef.current);
+  };
+
   const startAuth = () => {
     if (!modelsReady) {
       setInstruction('Models loading, please wait...');
@@ -66,13 +73,39 @@ export default function FaceAuthScreen(props: {onBack?: () => void}) {
     const c = getRandomChallenge();
     setAuthState('liveness');
     setInstruction(getChallengeInstruction(c, t));
+    centerXReadings.current = [];
+    samplingActive.current = false;
     let remaining = 5;
     setTimer(remaining);
+
+    sampleIntervalRef.current = setInterval(async () => {
+      if (samplingActive.current) return;
+      samplingActive.current = true;
+      try {
+        const snap = await cameraRef.current!.takeSnapshot({quality: 10});
+        const cx = await snapshotToBbox(snap.path);
+        if (cx !== null) centerXReadings.current.push(cx);
+      } catch {}
+      samplingActive.current = false;
+    }, 600);
+
     timerRef.current = setInterval(() => {
       remaining -= 1;
       setTimer(remaining);
       if (remaining <= 0) {
         clearTimer();
+        clearSampleInterval();
+        const readings = centerXReadings.current;
+        const spread = readings.length >= 2
+          ? Math.max(...readings) - Math.min(...readings)
+          : 0;
+        console.log('[liveness] head-turn spread:', spread.toFixed(3), 'samples:', readings.length);
+        if (spread < 0.05) {
+          setAuthState('failed');
+          setInstruction(t.failed);
+          setTimeout(() => reset(), 3000);
+          return;
+        }
         runRecognition();
       }
     }, 1000);
@@ -135,6 +168,7 @@ export default function FaceAuthScreen(props: {onBack?: () => void}) {
 
   const reset = () => {
     clearTimer();
+    clearSampleInterval();
     setAuthState('idle');
     setInstruction(t.tapToStart);
     setTimer(0);

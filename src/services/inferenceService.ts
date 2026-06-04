@@ -132,6 +132,7 @@ export function findBestMatch(
   }
 
   if (!best) return null;
+  console.log('[match] best candidate:', best.employee_id, best.name, 'score:', best.score.toFixed(3));
   if (best.score < RECOGNITION_THRESHOLD) {
     console.log('[match] rejected — score too low:', best.score.toFixed(3));
     return null;
