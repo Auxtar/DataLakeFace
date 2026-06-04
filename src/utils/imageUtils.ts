@@ -1,6 +1,6 @@
 import jpeg from 'jpeg-js';
 import ImageResizer from '@bam.tech/react-native-image-resizer';
-import {detectFace, getFaceEmbedding, debugBlazeFace} from '../services/inferenceService';
+import {detectFace, getFaceEmbedding} from '../services/inferenceService';
 
 function cropRGB(src: Uint8Array, srcW: number, srcH: number, x1: number, y1: number, x2: number, y2: number, dstSize: number): Uint8Array {
   let cropX = Math.floor(x1 * srcW);
@@ -74,27 +74,15 @@ export async function snapshotToPixels(
   filePath: string,
 ): Promise<{px112: Uint8Array; px224: Uint8Array} | null> {
   try {
-    const t0 = Date.now();
     const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
 
-    const resized = await ImageResizer.createResizedImage(uri, 448, 448, 'JPEG', 85, 0, undefined, undefined, {mode: 'cover'});
+    const resized = await ImageResizer.createResizedImage(uri, 320, 320, 'JPEG', 85, 0, undefined, undefined, {mode: 'cover'});
     const decoded = await decodeResizedJpeg(resized.uri);
     if (!decoded) return null;
-    console.log('[imageUtils] decode done:', Date.now() - t0, 'ms');
 
     const {rgb: square, side} = letterboxSquare(decoded.rgb, decoded.w, decoded.h);
     const detectInput = cropRGB(square, side, side, 0, 0, 1, 1, 128);
 
-    let dmin = 255, dmax = 0, dnan = 0;
-    for (let i = 0; i < detectInput.length; i++) {
-      const v = detectInput[i];
-      if (Number.isNaN(v)) dnan++;
-      if (v < dmin) dmin = v;
-      if (v > dmax) dmax = v;
-    }
-    console.log('[imageUtils] decoded', decoded.w, decoded.h, 'detectInput 128 128 len', detectInput.length, 'min', dmin, 'max', dmax, 'nan', dnan);
-
-    debugBlazeFace(detectInput);
     const bbox = detectFace(detectInput);
     console.log('[imageUtils] bbox:', bbox);
 
@@ -102,7 +90,7 @@ export async function snapshotToPixels(
     let px224: Uint8Array;
 
     if (bbox) {
-      const pad = 0.20;
+      const pad = 0.10;
       const x1 = Math.max(0, bbox[0] - pad);
       const y1 = Math.max(0, bbox[1] - pad);
       const x2 = Math.min(1, bbox[2] + pad);
@@ -116,7 +104,6 @@ export async function snapshotToPixels(
       console.log('[imageUtils] used center crop fallback');
     }
 
-    console.log('[imageUtils] total:', Date.now() - t0, 'ms');
     return {px112, px224};
   } catch (e) {
     console.error('[imageUtils] failed:', e);
